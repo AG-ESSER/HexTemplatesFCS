@@ -5,7 +5,7 @@
 #'
 #' @return A ggplot2 plot
 #' @export
-#' @importFrom ggplot2 ggplot scale_fill_gradientn labs
+#' @import ggplot2
 #' @import sf
 #' @examples
 plot.HexTemplate <- function(hexTemplate, sample = NA) {
@@ -13,7 +13,7 @@ plot.HexTemplate <- function(hexTemplate, sample = NA) {
   #add optional "add text" argument c("hexnr", "rel", "abs")
 
   sf_poly <- as(hexTemplate@hexagonSP, "sf")
-
+  freq <- frequencies(hexTemplate)[sample,]
   if (is.na(sample)) {
 
     ggplot(sf_poly)+
@@ -23,7 +23,7 @@ plot.HexTemplate <- function(hexTemplate, sample = NA) {
 
     colours <- c("blue4", "cyan3", "darkgreen", "mediumseagreen",  "chartreuse1", "goldenrod" , "gold", "darkorange", "firebrick1", "firebrick4")
 
-    ggplot(sf_poly,aes(fill = log10(hexTemplate@counts[[sample]])))+
+    ggplot(sf_poly,aes(fill = log10(freq)))+#log10(hexTemplate@counts[[sample]])))+
       geom_sf(color = NA) +
       scale_fill_gradientn(colours = colours) +
       labs(fill = "log10(Events)", title = names(hexTemplate@counts[sample]), x = hexTemplate@xChannel, y = hexTemplate@yChannel)
