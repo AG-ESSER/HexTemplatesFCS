@@ -3,7 +3,7 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
+<!-- knitr::knit("README.Rmd") -->
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of HexTemplatesFCS is to ...
+The goal of HexTemplatesFCS is to quickly and easily generate data structures for getting statistical output starting from raw fcs-Files and a metadata table. The grid approach is especially useful if there aren't any populations clearly visible in the files.
+
 
 ## Installation
 
@@ -26,7 +27,7 @@ You can install the development version of HexTemplatesFCS from GitHub with:
 
 ``` r
 library(devtools)
-install_github("IUF/HexTemplatesFCS")
+install_github("AG-ESSER/HexTemplatesFCS")
 ```
 
 ## Example
