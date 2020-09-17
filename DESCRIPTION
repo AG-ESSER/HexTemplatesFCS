@@ -15,4 +15,5 @@ Depends:
 Imports: 
     magrittr,
     ggplot2,
-    sf
+    sf,
+    dplyr

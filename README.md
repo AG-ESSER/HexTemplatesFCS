@@ -9,9 +9,9 @@ HexTemplatesFCS
 <!-- badges: end -->
 
 The goal of HexTemplatesFCS is to quickly and easily generate data
-structures for getting statistical output starting from raw fcs-Files
-and a metadata table. The grid approach is especially useful if there
-aren’t any populations clearly visible in the files.
+structures that make it easy to get statistical output starting from raw
+fcs-files and a metadata table. The grid approach is especially useful
+if there aren’t any populations clearly visible in the files.
 
 Installation
 ------------
