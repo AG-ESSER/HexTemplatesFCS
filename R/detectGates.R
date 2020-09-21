@@ -38,6 +38,7 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10) {
 
   #neighboring matrix w
   centroids <- as.data.frame(coordinates(template@hexagonSP))
+  euclDist <- as.matrix(dist(centroids, method = "euclidean"))
   w <- euclDist %>%
     round(1) %>%
     as.vector() %>%
