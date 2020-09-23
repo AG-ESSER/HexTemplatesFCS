@@ -5,8 +5,8 @@
 #' @param yChannel A string representing the y-axis channel
 #' @param xbins Number of hexagons on the x-axis - 1
 #' @param metadata A data.frame containing metadata. Column names should be the group names.
-#'
-#' @return A HexTemplate \code{\link{HexTemplate}}
+#' @param trans_fun A function to transform the data. Standard is \code{log10}. \code{return} if data should not be transformed.
+#' @return A HexTemplate
 #' @export
 #'
 #' @importFrom hexbin hexbin
@@ -16,7 +16,7 @@
 #' #show available channels
 #' colnames(fcs)
 #' hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", metadata)
-HexTemplate <- function(flowset, xChannel, yChannel, xbins = 20, metadata = data.frame()) {
+HexTemplate <- function(flowset, xChannel, yChannel, xbins = 20, metadata = data.frame(), trans_fun = log10) {
   #create HexTemplate object
 
   #turn flowset environment into list and reorder alphabetically
@@ -24,7 +24,7 @@ HexTemplate <- function(flowset, xChannel, yChannel, xbins = 20, metadata = data
   fl <- fl[order(names(fl))]
 
   #log10-transform x- and yChannel data
-  logD <- lapply(fl, function(x) as.data.frame(log10(x@exprs[, c(xChannel , yChannel)])))
+  logD <- lapply(fl, function(x) as.data.frame(trans_fun(x@exprs[, c(xChannel , yChannel)])))
 
   #set -Inf entries to 0
   logD <- lapply(logD, function(x) {

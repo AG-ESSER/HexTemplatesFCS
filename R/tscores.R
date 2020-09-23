@@ -27,7 +27,7 @@ tscores <- function(template, group = 1) {
 
   })
 
-  colnames(tscores) <- paste(gr[,1],gr[,2], sep = "-")
+  colnames(tscores) <- paste(gr[,2],gr[,1], sep = "-")
   tscores
 
 }

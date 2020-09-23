@@ -10,5 +10,6 @@
 #' @examples
 plot_tscores <- function(template, ts,...) {
   plot(template, mapping = aes(fill = ts),...) +
-    scale_fill_gradient2(low = "blue", high = "red")
+    scale_fill_gradient2(low = "blue", high = "red") +
+    labs(title = colnames(ts))
 }

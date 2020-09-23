@@ -5,13 +5,14 @@
 #' @param thresh A threshold that indicates neighboring hexagons might belong to the same region of interest (gate)
 #' @param minT A minimum t-score so that a hexagon with this score is regarded as a valid entry point
 #' @param tryO An integer that determines how many times should be looked for the best configuration
+#' @param nM An integer specifying what is considered a neighbor
 #'
 #' @return A sf Object
 #' @export
 #' @import dplyr
 #' @import sf
 #' @examples
-detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10) {
+detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2) {
 
   floodFill <- function(hexNr, org, rn) {
     for(i in 1:template@nHex) {
@@ -45,8 +46,8 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10) {
     dplyr::dense_rank() %>%
     matrix(ncol = template@nHex, nrow = template@nHex)
 
-  w[w <= 2] <- 1
-  w[w > 2] <- 0
+  w[w <= nM] <- 1
+  w[w > nM] <- 0
 
   q <- quantile(ts, na.rm = T)
 
@@ -86,11 +87,11 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10) {
   p <- lapply(2:max(roi.env$roi), function(x){
     cr <- centroids[which(roi.env$roi == x),]
     cr <- cr[chull(cr),]
-    Polygon(cr)
+    #Polygon(cr)
   })
 
-  ps = Polygons(p,1)
-  sps = SpatialPolygons(list(ps))
-  as(sps, "sf")
+  # ps = Polygons(p,1)
+  # sps = SpatialPolygons(list(ps))
+  # as(sps, "sf")
 
 }

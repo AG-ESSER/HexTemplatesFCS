@@ -4,7 +4,14 @@
 \alias{HexTemplate}
 \title{Title}
 \usage{
-HexTemplate(flowset, xChannel, yChannel, xbins = 20, metadata = data.frame())
+HexTemplate(
+  flowset,
+  xChannel,
+  yChannel,
+  xbins = 20,
+  metadata = data.frame(),
+  trans_fun = log10
+)
 }
 \arguments{
 \item{flowset}{A flowCore \code{flowSet}}
@@ -16,9 +23,11 @@ HexTemplate(flowset, xChannel, yChannel, xbins = 20, metadata = data.frame())
 \item{xbins}{Number of hexagons on the x-axis - 1}
 
 \item{metadata}{A data.frame containing metadata. Column names should be the group names.}
+
+\item{trans_fun}{A function to transform the data. Standard is \code{log10}. \code{return} if data should not be transformed.}
 }
 \value{
-A HexTemplate \code{\link{HexTemplate}}
+A HexTemplate
 }
 \description{
 Title

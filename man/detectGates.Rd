@@ -4,7 +4,7 @@
 \alias{detectGates}
 \title{Automatically detect Gates based on the t-scores}
 \usage{
-detectGates(template, ts, thresh = 5, minT = 1, tryO = 10)
+detectGates(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2)
 }
 \arguments{
 \item{template}{A HexTemplate Object}
@@ -16,6 +16,8 @@ detectGates(template, ts, thresh = 5, minT = 1, tryO = 10)
 \item{minT}{A minimum t-score so that a hexagon with this score is regarded as a valid entry point}
 
 \item{tryO}{An integer that determines how many times should be looked for the best configuration}
+
+\item{nM}{An integer specifying what is considered a neighbor}
 }
 \value{
 A sf Object
