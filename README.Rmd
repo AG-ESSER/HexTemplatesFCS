@@ -1,5 +1,8 @@
 ---
-output: github_document
+output: 
+  github_document:
+    toc: true
+    toc_depth: 3
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -30,27 +33,129 @@ library(devtools)
 install_github("AG-ESSER/HexTemplatesFCS")
 ```
 
-## Example
+# Instructions
 
-This is a basic example which shows you how to solve a common problem:
+## Part 1: Read .fcs-files and metadata
+The .fcs-files should already be cleaned up. The metadata table should preferably be saved in .csv or any other easy to read format. The rows of the metadata table should correspond to the .fcs-files in alphabetical order (e.g. sample_01.fcs, sample_02.fcs,..., sample_10.fcs). The *flowCore* library is needed for reading .fcs files.
 
 ```{r example}
+library(flowCore)
+
+setwd("C:/Users/student.esser/FACSDATA/Exp4")                 #set working directory
+fcs <- read.flowSet(pattern = ".fcs")                         #read all .fcs-files in directory
+metadata <- read.table("metadata.csv", sep = ";", header = T) #read metadata table
+```
+
+Example metadata table:
+```{r}
+head(metadata[,1:4])
+```
+
+## Part 2: Creating necessary data structures
+### Part 2.1: Creating a hexagon template
+Check the available channels:
+```{r}
+colnames(fcs)
+```
+
+Create the HexTemplate:
+```{r}
 library(HexTemplatesFCS)
-## basic example code
+
+hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", xbins = 20, metadata = metadata, trans_fun = log10)
+```
+Every further output will be based on this template. The *flowset* argument takes the flowSet we acquired by reading the .fcs-files in Part 1. For the *xChannel* and the *yChannel* argument select the channels you are interested in examining. The number of *xbins* correspond to the number of hexagons on the x-axis - 1. This should be at least 20. Lastly give your metadata table to the *metadata* argument. Give a function to transform your data to the trans_fun argument. Standard is log10. When no data transformation should be done use *return*. The content of a HexTemplate can be inspected using *View(hexT)*.
+
+### Part 2.2: Creating a frequency table
+```{r}
+freq <- frequencies(hexT)
+head(freq[,1:4])
+```
+In the HexTemplate's count slot, the events that fall into any given hexagon are stored as absolute values. The *frequencies*-function recalculates those values in relation to the overall number of events in a sample. This way comparison between samples is possible independently of the number of events recorded for each sample.
+
+### Part 2.3: Creating a distance matrix
+```{r}
+distM <- weightedBray(hexT)
+head(as.matrix(distM)[,1:2])
+```
+Calculate a distance matrix for every combination of samples. The *weightedBray* function automatically adjusts for spatial dependencies. If no adjustments should be done the *vegdist* function from the *vegan* package can be used in conjunction with the frequency table from part 2.2. 
+
+## Part 3: Output
+
+### Part 3.1: Plotting the template
+Plot the empty template
+```{r}
+plot(hexT)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
+Plot the template filled with sample no. 5
+```{r}
+plot(hexT, sample = 5)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+### Part 3.2: Calculate and plot tscores
+Calculate t-scores between a metadata group for every hexagon and use it as a measurement of difference.
 
-You can also embed plots, for example:
+### Part 3.3: nmds-plot
+Visualize the difference between every sample in the template using a nmds-plots using *vegan's* *metaMDS*. A single point represents a sample/.fcs-file. You can use either the frequency table or the distance matrix as calculated in part 2.
+```{r, message = F}
+library(vegan)
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+nmd <- metaMDS(distM, trace = F)
+
+ordiplot(nmd, display = "sites")
+ordispider(nmd, groups = meta.data(hexT)[,"treatment_dose"])
+ordiellipse(nmd, groups = meta.data(hexT)[,"treatment_dose"], label = T, draw = "polygon")
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+### Part 3.4: Heatmap
+Use any heatmap library available and the frequency table we calculated in part 2 to plot a heatmap. In this example we're using the *pheatmap* library: (https://slowkow.com/notes/pheatmap-tutorial/)
+```{r, message = F}
+library(pheatmap) #or any other heatmap library
+library(viridis)  #for color scale
+
+mat_breaks <- quantile(freq, probs = seq(0, 1, length.out = 10))
+mat_breaks <- mat_breaks[!duplicated(mat_breaks)]
+
+pheatmap(freq, 
+         annotation_row = meta.data(hexT)[,c("treatment_dose"), drop = F], #your metadata groups
+         color = plasma(length(mat_breaks)-1),
+         breaks = mat_breaks,
+         treeheight_col = 0)
+```
+
+### Part 3.5: adonis (PERMANOVA)
+Use *vegan's* *adonis*-function and the distance matrix we calculated in part 2 to get statistical output about your data. Be aware that the treatment_dose metadata group in this example is a character vector. Every dosage is therefore treated as an independent treatment and the actual dosage is not taken into account.
+```{r}
+adonis(distM ~ treatment_dose, data = meta.data(hexT))
+```
+
+## Part 4: Additional information
+You can save your HexTemplate using *saveRDS* and read it at a later time using *readRDS*.
+```{r, eval = F}
+saveRDS(hexT, "hexT.rds")
+hexT <- readRDS("hexT.rds")
+```
+
+You can save the frequency table and the distance matrix to .csv files to analyze them in alternative statistical applications.
+```{r, eval = F}
+write.csv(freq, "frequencies.csv")
+write.csv(as.matrix(distM), "distMatrix.csv")
+```
+
+You can use the @ operator to look at the slots of the HexTemplate (or use *View(hexT)*).
+```{r}
+hexT@nHex #number of hexagons
+```
+
+```{r}
+hexT@nSamples #number of samples
+```
+
+```{r}
+hexT@counts[1] #number of events in every hexagon for sample no 1
+```
+
+```{r}
+hexT@counts[[1]][25] #number of events in hexagon 25 for sample no 1
+```
