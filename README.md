@@ -20,7 +20,8 @@
         -   [Part 3.3: nmds-plot](#part-3.3-nmds-plot)
         -   [Part 3.4: Heatmap](#part-3.4-heatmap)
         -   [Part 3.5: adonis (PERMANOVA)](#part-3.5-adonis-permanova)
-    -   [Part 4: Additional information](#part-4-additional-information)
+    -   [Part 4: Customizing the plots](#part-4-customizing-the-plots)
+    -   [Part 5: Additional information](#part-5-additional-information)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- knitr::knit("README.Rmd") -->
@@ -272,14 +273,47 @@ actual dosage is not taken into account.
     #> 
     #> Terms added sequentially (first to last)
     #> 
-    #>                Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)    
-    #> treatment_dose  5   0.43645 0.087291  1.5735 0.24688  0.001 ***
-    #> Residuals      24   1.33141 0.055476         0.75312           
-    #> Total          29   1.76787                  1.00000           
+    #>                Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)   
+    #> treatment_dose  5   0.43645 0.087291  1.5735 0.24688  0.002 **
+    #> Residuals      24   1.33141 0.055476         0.75312          
+    #> Total          29   1.76787                  1.00000          
     #> ---
     #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Part 4: Additional information
+Part 4: Customizing the plots
+-----------------------------
+
+The plot and plot\_tscores functions return ggplot objects and are
+therefore highly customizable. They use geom\_sf internally to display
+the hexagons. Additional arguments passed to geom\_sf can be added in
+the function call.
+
+Plot the empty grid filled with random values
+
+    plot(hexT, color = NA, mapping = aes(fill = sample(hexT@nHex)))
+
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+
+Additional geoms and specifications can be added to the plot as in every
+ggplot call.
+
+Plot the id of every hexagon
+
+    plot(hexT) + 
+      geom_sf_text(mapping = aes(label = 1:hexT@nHex), size = 2.5)
+
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+
+Plot the number of events in every hexagon for sample no. 5 and hide the
+legend
+
+    plot(hexT, 5, color = NA) + 
+      geom_sf_text(mapping = aes(label = hexT@counts[[5]]), size = 2) +
+      theme(legend.position = "none")
+
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
+
+Part 5: Additional information
 ------------------------------
 
 You can save your HexTemplate using *saveRDS* and read it at a later

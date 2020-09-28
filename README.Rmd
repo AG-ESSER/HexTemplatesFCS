@@ -12,7 +12,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  dev.args = list(png = list(type = "cairo"))
 )
 ```
 
@@ -83,6 +84,7 @@ Calculate a distance matrix for every combination of samples. The *weightedBray*
 ## Part 3: Output
 
 ### Part 3.1: Plotting the template
+
 Plot the empty template
 ```{r}
 plot(hexT)
@@ -166,7 +168,30 @@ Use *vegan's* *adonis*-function and the distance matrix we calculated in part 2 
 adonis(distM ~ treatment_dose, data = meta.data(hexT))
 ```
 
-## Part 4: Additional information
+## Part 4: Customizing the plots
+The plot and plot_tscores functions return ggplot objects and are therefore highly customizable. They use geom_sf internally to display the hexagons. Additional arguments passed to geom_sf can be added in the function call.
+
+Plot the empty grid filled with random values
+```{r}
+plot(hexT, color = NA, mapping = aes(fill = sample(hexT@nHex)))
+```
+
+Additional geoms and specifications can be added to the plot as in every ggplot call.
+
+Plot the id of every hexagon
+```{r}
+plot(hexT) + 
+  geom_sf_text(mapping = aes(label = 1:hexT@nHex), size = 2.5)
+```
+
+Plot the number of events in every hexagon for sample no. 5 and hide the legend
+```{r}
+plot(hexT, 5, color = NA) + 
+  geom_sf_text(mapping = aes(label = hexT@counts[[5]]), size = 2) +
+  theme(legend.position = "none")
+```
+
+## Part 5: Additional information
 You can save your HexTemplate using *saveRDS* and read it at a later time using *readRDS*.
 ```{r, eval = F}
 saveRDS(hexT, "hexT.rds")

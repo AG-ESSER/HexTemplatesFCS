@@ -1,4 +1,4 @@
-#' Title
+#' Create a HexTemplate Object
 #'
 #' @param flowset A flowCore \code{flowSet}
 #' @param xChannel A string representing the x-axis channel
@@ -23,7 +23,7 @@ HexTemplate <- function(flowset, xChannel, yChannel, xbins = 20, metadata = data
   fl <- as.list(flowset@frames)
   fl <- fl[order(names(fl))]
 
-  #log10-transform x- and yChannel data
+  #transform x- and yChannel data
   logD <- lapply(fl, function(x) as.data.frame(trans_fun(x@exprs[, c(xChannel , yChannel)])))
 
   #set -Inf entries to 0

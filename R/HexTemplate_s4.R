@@ -13,5 +13,10 @@
 #'
 #' @examples
 setClass("HexTemplate",
-         representation(hexagonSP = "SpatialPolygons", counts = "list", metadata = "data.frame",
-                        xChannel = "character", yChannel = "character", nHex = "numeric", nSamples = "numeric"))
+         representation(hexagonSP = "SpatialPolygons",
+                        counts = "list",
+                        metadata = "data.frame",
+                        xChannel = "character",
+                        yChannel = "character",
+                        nHex = "numeric",
+                        nSamples = "numeric"))
