@@ -10,10 +10,11 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Depends:
-    hexbin, sp
 Imports: 
     magrittr,
     ggplot2,
     sf,
-    dplyr
+    dplyr,
+    concaveman,
+    hexbin,
+    sp

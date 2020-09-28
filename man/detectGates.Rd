@@ -4,7 +4,7 @@
 \alias{detectGates}
 \title{Automatically detect Gates based on the t-scores}
 \usage{
-detectGates(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2)
+detectGates(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, conc = 3.5)
 }
 \arguments{
 \item{template}{A HexTemplate Object}

@@ -5,6 +5,7 @@
 #' @param w Optionally you may provide your own weight matrix
 #'
 #' @return A distance matrix
+#' @import sp
 #' @export
 #'
 #' @examples

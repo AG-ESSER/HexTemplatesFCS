@@ -64,7 +64,7 @@ library(HexTemplatesFCS)
 
 hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", xbins = 20, metadata = metadata, trans_fun = log10)
 ```
-Every further output will be based on this template. The *flowset* argument takes the flowSet we acquired by reading the .fcs-files in Part 1. For the *xChannel* and the *yChannel* argument select the channels you are interested in examining. The number of *xbins* correspond to the number of hexagons on the x-axis - 1. This should be at least 20. Lastly give your metadata table to the *metadata* argument. Give a function to transform your data to the trans_fun argument. Standard is log10. When no data transformation should be done use *return*. The content of a HexTemplate can be inspected using *View(hexT)*.
+Every further output will be based on this template. The *flowset* argument takes the flowSet we acquired by reading the .fcs-files in part \1. For the *xChannel* and the *yChannel* argument select the channels you are interested in examining. The number of *xbins* correspond to the number of hexagons on the x-axis - 1. This should be at least 20. Lastly give your metadata table to the *metadata* argument. Give a function to transform your data to the trans_fun argument. Standard is log10. When no data transformation should be done use *return*. The content of a HexTemplate can be inspected using *View(hexT)*.
 
 ### Part 2.2: Creating a frequency table
 ```{r}
@@ -93,8 +93,44 @@ Plot the template filled with sample no. 5
 plot(hexT, sample = 5)
 ```
 
-### Part 3.2: Calculate and plot tscores
+### Part 3.2: Calculate and plot t-scores
 Calculate t-scores between a metadata group for every hexagon and use it as a measurement of difference.
+
+```{r}
+ts <- tscores(hexT, "treatment_dose")
+```
+This returns a data.frame of t-scores with the columns representing every possible unique combination of levels in the treatment_dose metadata group. Check the indices with *head(ts)*.
+
+```{r}
+head(ts)
+```
+
+Plot the differences between two levels (index 2). Use *drop = F* to show plot title.
+```{r}
+plot_tscores(hexT, ts[,5, drop = F], color = NA)
+```
+
+Automatically create polygon gates based on this index.
+```{r}
+gates <- detectGates(hexT, ts[,5], conc = 2)
+```
+
+Turn into sf object and plot
+```{r}
+library(sp)
+library(ggplot2)
+
+p <- lapply(gates, Polygon)
+
+ps = Polygons(p,1)
+sps = SpatialPolygons(list(ps))
+psf <- as(sps, "sf")
+
+
+plot_tscores(hexT, ts[,5, drop = F], color = NA) + 
+  geom_sf(data = psf, fill = NA)
+
+```
 
 ### Part 3.3: nmds-plot
 Visualize the difference between every sample in the template using a nmds-plots using *vegan's* *metaMDS*. A single point represents a sample/.fcs-file. You can use either the frequency table or the distance matrix as calculated in part 2.

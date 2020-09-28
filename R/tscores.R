@@ -17,17 +17,21 @@ tscores <- function(template, group = 1) {
   gr <- gr[gr[,1] != gr[,2],]
 
   tscores <- apply(gr, 1, function(x) {
-    smean <- apply(relative[,which(treatment == x[2])],1,mean)
-    pmean <- apply(relative[,which(treatment == x[1]| treatment == x[2])],1,mean)
+    s1mean <- apply(relative[,which(treatment == x[1])],1,mean)
+    s2mean <- apply(relative[,which(treatment == x[2])],1,mean)
 
-    ssd <- apply(relative[,which(treatment == x[2])],1,sd)
-    n <- ncol(relative[,which(treatment == x[2])])
+    v1 <- apply(relative[,which(treatment == x[1])],1,var)
+    v2 <- apply(relative[,which(treatment == x[2])],1,var)
 
-    (smean - pmean)/(ssd/sqrt(n))
+    N1 <- ncol(relative[,which(treatment == x[1])])
+    N2 <- ncol(relative[,which(treatment == x[2])])
+
+
+    (s1mean - s2mean)/sqrt((v1/N1)+(v2/N2))
 
   })
 
-  colnames(tscores) <- paste(gr[,2],gr[,1], sep = "-")
+  colnames(tscores) <- paste(gr[,1],gr[,2], sep = "-")
   tscores
 
 }

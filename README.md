@@ -16,7 +16,7 @@
         -   [Part 3.1: Plotting the
             template](#part-3.1-plotting-the-template)
         -   [Part 3.2: Calculate and plot
-            tscores](#part-3.2-calculate-and-plot-tscores)
+            t-scores](#part-3.2-calculate-and-plot-t-scores)
         -   [Part 3.3: nmds-plot](#part-3.3-nmds-plot)
         -   [Part 3.4: Heatmap](#part-3.4-heatmap)
         -   [Part 3.5: adonis (PERMANOVA)](#part-3.5-adonis-permanova)
@@ -88,14 +88,12 @@ Check the available channels:
 Create the HexTemplate:
 
     library(HexTemplatesFCS)
-    #> Loading required package: hexbin
-    #> Loading required package: sp
 
     hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", xbins = 20, metadata = metadata, trans_fun = log10)
 
 Every further output will be based on this template. The *flowset*
-argument takes the flowSet we acquired by reading the .fcs-files in Part
-1. For the *xChannel* and the *yChannel* argument select the channels
+argument takes the flowSet we acquired by reading the .fcs-files in part
+\\1. For the *xChannel* and the *yChannel* argument select the channels
 you are interested in examining. The number of *xbins* correspond to the
 number of hexagons on the x-axis - 1. This should be at least 20. Lastly
 give your metadata table to the *metadata* argument. Give a function to
@@ -156,10 +154,67 @@ Plot the template filled with sample no. 5
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
-### Part 3.2: Calculate and plot tscores
+### Part 3.2: Calculate and plot t-scores
 
 Calculate t-scores between a metadata group for every hexagon and use it
 as a measurement of difference.
+
+    ts <- tscores(hexT, "treatment_dose")
+
+This returns a data.frame of t-scores with the columns representing
+every possible unique combination of levels in the treatment\_dose
+metadata group. Check the indices with *head(ts)*.
+
+    head(ts)
+    #>         3,125-0    6,25-0      12,5-0      25-0      50-0 6,25-3,125 12,5-3,125
+    #> [1,] -0.2751242 0.2274578 -0.57998178 0.7224675 0.1019336  0.5037482 -0.2860039
+    #> [2,]  0.6944512 1.0225454 -0.30495743 0.3895704 0.4476899  0.3756828 -1.0305803
+    #> [3,]  2.1894266 1.4679832  0.05669078 0.8756599 1.0498121 -0.2605903 -1.8727017
+    #> [4,]  3.1136037 1.5322730  0.87936170 1.2424625 1.6216111 -0.8399287 -1.1324296
+    #> [5,]  5.5867544 3.2055839  2.10241390 1.5529765 2.8163271 -0.9964887 -1.4432502
+    #> [6,]  3.3009791 3.6056827  2.95330393 1.3673997 2.2944121 -0.7191945 -1.6810506
+    #>        25-3,125   50-3,125  12,5-6,25     25-6,25     50-6,25    25-12,5
+    #> [1,]  1.0430971  0.4445881 -0.8238255  0.46523884 -0.17223026  1.4764346
+    #> [2,] -0.1781815 -0.2379109 -1.3330693 -0.49572718 -0.59606466  0.6296333
+    #> [3,] -0.2226368 -0.8945110 -1.3052662 -0.05472895 -0.49220335  0.8139920
+    #> [4,] -0.5461003 -1.0016631 -0.3668458  0.08038275 -0.06067205  0.3820174
+    #> [5,] -2.0076015 -0.1928362 -0.5181391 -1.00764989  0.48841786 -0.4416519
+    #> [6,] -2.5333947 -0.2841835 -1.2447823 -2.44010398  0.28008896 -1.4677772
+    #>        50-12,5      50-25
+    #> [1,] 0.8899373 -0.7795065
+    #> [2,] 0.7678481 -0.0225813
+    #> [3,] 0.8980262 -0.2689056
+    #> [4,] 0.3338774 -0.1317701
+    #> [5,] 0.8756360  1.2735054
+    #> [6,] 1.0290481  1.7124040
+
+Plot the differences between two levels (index 2). Use *drop = F* to
+show plot title.
+
+    plot_tscores(hexT, ts[,5, drop = F], color = NA)
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+Automatically create polygon gates based on this index.
+
+    gates <- detectGates(hexT, ts[,5], conc = 2)
+
+Turn into sf object and plot
+
+    library(sp)
+    library(ggplot2)
+
+    p <- lapply(gates, Polygon)
+
+    ps = Polygons(p,1)
+    sps = SpatialPolygons(list(ps))
+    psf <- as(sps, "sf")
+
+
+    plot_tscores(hexT, ts[,5, drop = F], color = NA) + 
+      geom_sf(data = psf, fill = NA)
+
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 ### Part 3.3: nmds-plot
 
@@ -176,7 +231,7 @@ matrix as calculated in part 2.
     ordispider(nmd, groups = meta.data(hexT)[,"treatment_dose"])
     ordiellipse(nmd, groups = meta.data(hexT)[,"treatment_dose"], label = T, draw = "polygon")
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 ### Part 3.4: Heatmap
 
@@ -197,7 +252,7 @@ library:
              breaks = mat_breaks,
              treeheight_col = 0)
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
 ### Part 3.5: adonis (PERMANOVA)
 

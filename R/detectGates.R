@@ -11,8 +11,9 @@
 #' @export
 #' @import dplyr
 #' @import sf
+#' @import concaveman
 #' @examples
-detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2) {
+detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, conc = 3.5) {
 
   floodFill <- function(hexNr, org, rn) {
     for(i in 1:template@nHex) {
@@ -86,7 +87,7 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2) {
   #create spatialPolygons gates
   p <- lapply(2:max(roi.env$roi), function(x){
     cr <- centroids[which(roi.env$roi == x),]
-    cr <- cr[chull(cr),]
+    cr <- concaveman(as.matrix(cr), concavity = conc, length_threshold = .1)#cr[chull(cr),]
     #Polygon(cr)
   })
 
