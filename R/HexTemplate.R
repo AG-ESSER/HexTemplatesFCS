@@ -46,7 +46,8 @@ HexTemplate <- function(flowset, xChannel, yChannel, xbins = 20, metadata = data
   nHex <- hexb@ncells
   nSamples <- length(df)
   rownames(metadata) <- names(fl)
+  gapID <- hexb@cell
 
   new("HexTemplate", hexagonSP = hsp, counts = df, metadata = metadata,
-      xChannel = xChannel, yChannel = yChannel, nHex = nHex, nSamples = nSamples)
+      xChannel = xChannel, yChannel = yChannel, nHex = nHex, nSamples = nSamples, gapID = gapID)
 }

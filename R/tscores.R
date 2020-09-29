@@ -1,4 +1,4 @@
-#' Get t-scores for a HexTemplate and a Metadata Group
+#' Get t-scores according to Welch's t-statistic for a HexTemplate and a Metadata Group
 #'
 #' @param template A HexTemplate Object
 #' @param group A metadata group

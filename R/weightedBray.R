@@ -2,7 +2,7 @@
 #'
 #' @param hexTemplate A \code{\link{HexTemplate}} Object
 #' @param gamma A positive number specifying the drop off of the weight matrix when w = NA
-#' @param w Optionally you may provide your own weight matrix
+#' @param w Optionally you may provide your own weight matrix created with \code{\link{weightMatrix}}
 #'
 #' @return A distance matrix
 #' @import sp
@@ -12,7 +12,6 @@
 weightedBray <- function(hexTemplate, gamma = 8, w = NA) {
   #computes weighted bray distance between samples
   #if w is undefined then w = exp(-1*gamma*euclDist)
-  #optionally you can provide your own weight matrix (test with plotWeight)
 
   h <- t(frequencies(hexTemplate))
 

@@ -5,16 +5,16 @@
 #' @param ... Additional arguments passed to \code{geom_sf}
 #'
 #' @return A ggplot2 plot
-#' @export
 #' @import ggplot2
 #' @import sf
-#' @examples
-plot.HexTemplate <- function(hexTemplate, sample = NA,...) {
-  #sanity checks
-  #add optional "add text" argument c("hexnr", "rel", "abs")
+#' @method plot HexTemplate
+#' @export
 
-  sf_poly <- as(hexTemplate@hexagonSP, "sf")
-  freq <- frequencies(hexTemplate)[sample,]
+#' @examples
+plot.HexTemplate <- function(template, sample = NA,...) {
+
+  sf_poly <- as(template@hexagonSP, "sf")
+  freq <- frequencies(template)[sample,]
   if (is.na(sample)) {
 
     ggplot(sf_poly)+
@@ -27,7 +27,7 @@ plot.HexTemplate <- function(hexTemplate, sample = NA,...) {
     ggplot(sf_poly,aes(fill = log10(freq)))+
       geom_sf(...) +
       scale_fill_gradientn(colours = colours) +
-      labs(fill = "log10(Events)", title = names(hexTemplate@counts[sample]), x = hexTemplate@xChannel, y = hexTemplate@yChannel)
+      labs(fill = "log10(Events)", title = names(template@counts[sample]), x = template@xChannel, y = template@yChannel)
 
   }
 }

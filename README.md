@@ -189,7 +189,7 @@ metadata group. Check the indices with *head(ts)*.
     #> [5,] 0.8756360  1.2735054
     #> [6,] 1.0290481  1.7124040
 
-Plot the differences between two levels (index 2). Use *drop = F* to
+Plot the differences between two levels (index 5). Use *drop = F* to
 show plot title.
 
     plot_tscores(hexT, ts[,5, drop = F], color = NA)
@@ -200,17 +200,13 @@ Automatically create polygon gates based on this index.
 
     gates <- detectGates(hexT, ts[,5], conc = 2)
 
-Turn into sf object and plot
+Turn into simple features object and plot
 
-    library(sp)
+    library(sf)
+    #> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
     library(ggplot2)
 
-    p <- lapply(gates, Polygon)
-
-    ps = Polygons(p,1)
-    sps = SpatialPolygons(list(ps))
-    psf <- as(sps, "sf")
-
+    psf <- st_polygon(gates)
 
     plot_tscores(hexT, ts[,5, drop = F], color = NA) + 
       geom_sf(data = psf, fill = NA)
@@ -283,9 +279,9 @@ actual dosage is not taken into account.
 Part 4: Customizing the plots
 -----------------------------
 
-The plot and plot\_tscores functions return ggplot objects and are
+The *plot* and *plot\_tscores* functions return ggplot objects and are
 therefore highly customizable. They use geom\_sf internally to display
-the hexagons. Additional arguments passed to geom\_sf can be added in
+the hexagons. Additional arguments passed to geom\_sf can be added to
 the function call.
 
 Plot the empty grid filled with random values

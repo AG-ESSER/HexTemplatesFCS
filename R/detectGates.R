@@ -52,7 +52,7 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, c
 
   q <- quantile(ts, na.rm = T)
 
-  #for modifying by reference
+  #creating environment for modifying by reference
   roi.env <- new.env()
   roi.env$roi <- rep(0, template@nHex)
   mx <- 0
@@ -65,7 +65,7 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, c
     entryPoint()
 
     hist <- table(roi.env$roi)
-    #find optimal
+    #find optimal (most hexagons covered with minimal number of gates)
     m <- sum(hist[-1])/nlevels(as.factor(roi.env$roi))
     if(m > mx) {
       mx <- m
@@ -84,15 +84,9 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, c
   roi.env$roi[which(roi.env$roi %in% as.numeric(names(which(hist <= 2))))] <- 0
   roi.env$roi <- dplyr::dense_rank(roi.env$roi)
 
-  #create spatialPolygons gates
+  #create concave gates
   p <- lapply(2:max(roi.env$roi), function(x){
     cr <- centroids[which(roi.env$roi == x),]
     cr <- concaveman(as.matrix(cr), concavity = conc, length_threshold = .1)#cr[chull(cr),]
-    #Polygon(cr)
   })
-
-  # ps = Polygons(p,1)
-  # sps = SpatialPolygons(list(ps))
-  # as(sps, "sf")
-
 }

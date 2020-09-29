@@ -19,4 +19,5 @@ setClass("HexTemplate",
                         xChannel = "character",
                         yChannel = "character",
                         nHex = "numeric",
-                        nSamples = "numeric"))
+                        nSamples = "numeric",
+                        gapID = "vector"))

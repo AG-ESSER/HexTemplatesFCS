@@ -2,7 +2,7 @@
 % Please edit documentation in R/tscores.R
 \name{tscores}
 \alias{tscores}
-\title{Get t-scores for a HexTemplate and a Metadata Group}
+\title{Get t-scores according to Welch's t-statistic for a HexTemplate and a Metadata Group}
 \usage{
 tscores(template, group = 1)
 }
@@ -15,5 +15,5 @@ tscores(template, group = 1)
 A DataFrame of t-scores
 }
 \description{
-Get t-scores for a HexTemplate and a Metadata Group
+Get t-scores according to Welch's t-statistic for a HexTemplate and a Metadata Group
 }

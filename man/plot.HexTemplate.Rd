@@ -4,14 +4,14 @@
 \alias{plot.HexTemplate}
 \title{Plot an empty or filled HexTemplate}
 \usage{
-\method{plot}{HexTemplate}(hexTemplate, sample = NA, ...)
+\method{plot}{HexTemplate}(template, sample = NA, ...)
 }
 \arguments{
-\item{hexTemplate}{A \code{\link{HexTemplate}} Object}
-
 \item{sample}{A positive number corresponding to the sample with which the template should be filled. Leave NA to plot empty template.}
 
 \item{...}{Additional arguments passed to \code{geom_sf}}
+
+\item{hexTemplate}{A \code{\link{HexTemplate}} Object}
 }
 \value{
 A ggplot2 plot

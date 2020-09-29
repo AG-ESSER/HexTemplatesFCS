@@ -2,7 +2,7 @@
 % Please edit documentation in R/HexTemplate.R
 \name{HexTemplate}
 \alias{HexTemplate}
-\title{Title}
+\title{Create a HexTemplate Object}
 \usage{
 HexTemplate(
   flowset,
@@ -30,7 +30,7 @@ HexTemplate(
 A HexTemplate
 }
 \description{
-Title
+Create a HexTemplate Object
 }
 \examples{
 #get example fcs

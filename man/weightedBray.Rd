@@ -11,7 +11,7 @@ weightedBray(hexTemplate, gamma = 8, w = NA)
 
 \item{gamma}{A positive number specifying the drop off of the weight matrix when w = NA}
 
-\item{w}{Optionally you may provide your own weight matrix}
+\item{w}{Optionally you may provide your own weight matrix created with \code{\link{weightMatrix}}}
 }
 \value{
 A distance matrix
