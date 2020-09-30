@@ -61,20 +61,20 @@ files.
 
     library(flowCore)
 
-    setwd("C:/Users/student.esser/FACSDATA/Exp4")                 #set working directory
+    setwd("C:/Users/student.esser/FACSDATA/FCS_skin_microbiome")  #set working directory
     fcs <- read.flowSet(pattern = ".fcs")                         #read all .fcs-files in directory
     metadata <- read.table("metadata.csv", sep = ";", header = T) #read metadata table
 
 Example metadata table:
 
     head(metadata[,1:4])
-    #>           ID sample genetic_background    sex
-    #> 1  021321//2      1           C57Bl/6J female
-    #> 2 021322//13      2           C57Bl/6J female
-    #> 3 021323//15      3           C57Bl/6J female
-    #> 4 021324//18      4           C57Bl/6J female
-    #> 5 021325//20      5           C57Bl/6J female
-    #> 6  021326//4      6           C57Bl/6J female
+    #>   Sample.ID Hautareal Geschlecht Datum.Probenentnahme
+    #> 1         1    Areal1       Male           17.08.2020
+    #> 2         3    Areal1     Female           19.08.2020
+    #> 3         5    Areal1       Male           20.08.2020
+    #> 4         7    Areal1     Female           20.08.2020
+    #> 5         9    Areal1       Male           20.08.2020
+    #> 6        11    Areal1     Female           21.08.2020
 
 Part 2: Creating necessary data structures
 ------------------------------------------
@@ -84,13 +84,14 @@ Part 2: Creating necessary data structures
 Check the available channels:
 
     colnames(fcs)
-    #> [1] "FSC-H"  "SSC-H"  "DAPI-H" "Time"
+    #>  [1] "FSC-A"  "FSC-H"  "SSC-A"  "SSC-H"  "FITC-A" "FITC-H" "APC-A"  "APC-H" 
+    #>  [9] "DAPI-A" "DAPI-H" "Time"
 
 Create the HexTemplate:
 
     library(HexTemplatesFCS)
 
-    hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", xbins = 20, metadata = metadata, trans_fun = log10)
+    hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "FITC-H", xbins = 20, metadata = metadata, trans_fun = log10)
 
 Every further output will be based on this template. The *flowset*
 argument takes the flowSet we acquired by reading the .fcs-files in part
@@ -106,13 +107,13 @@ HexTemplate can be inspected using *View(hexT)*.
 
     freq <- frequencies(hexT)
     head(freq[,1:4])
-    #>                                       [,1]        [,2]       [,3]       [,4]
-    #> sample_051518_Tube_001_001.fcs 0.005111111 0.008777778 0.02044444 0.05211111
-    #> sample_051518_Tube_002_002.fcs 0.011666667 0.013666667 0.03366667 0.07600000
-    #> sample_051518_Tube_003_003.fcs 0.004111111 0.007888889 0.01900000 0.05022222
-    #> sample_051518_Tube_004_004.fcs 0.005333333 0.006777778 0.01533333 0.03644444
-    #> sample_051518_Tube_005_005.fcs 0.003333333 0.004888889 0.01811111 0.05022222
-    #> sample_051518_Tube_006_006.fcs 0.004444444 0.012222222 0.03355556 0.08822222
+    #>                          [,1]      [,2]      [,3]      [,4]
+    #> Areal1_03_022.fcs 0.007333333 0.2153333 0.2820000 0.2593333
+    #> Areal1_04_023.fcs 0.014666667 0.2693333 0.3560000 0.3426667
+    #> Areal1_06_024.fcs 0.006666667 0.3033333 0.4153333 0.4220000
+    #> Areal1_07_025.fcs 0.024955960 0.4139753 0.4947152 0.5020552
+    #> Areal1_08_026.fcs 0.016000000 0.3013333 0.4013333 0.4073333
+    #> Areal1_10_027.fcs 0.014666667 0.3266667 0.4086667 0.4393333
 
 In the HexTemplate’s count slot, the events that fall into any given
 hexagon are stored as absolute values. The *frequencies*-function
@@ -125,12 +126,12 @@ of the number of events recorded for each sample.
     distM <- weightedBray(hexT)
     head(as.matrix(distM)[,1:2])
     #>           1         2
-    #> 1 0.0000000 0.3388322
-    #> 2 0.3388322 0.0000000
-    #> 3 0.3357465 0.2974187
-    #> 4 0.3247938 0.3106065
-    #> 5 0.3466697 0.3148498
-    #> 6 0.3742618 0.3906717
+    #> 1 0.0000000 0.4641299
+    #> 2 0.4641299 0.0000000
+    #> 3 0.4487567 0.4114543
+    #> 4 0.4750236 0.3922473
+    #> 5 0.4143980 0.3669798
+    #> 6 0.4241061 0.3715834
 
 Calculate a distance matrix for every combination of samples. The
 *weightedBray* function automatically adjusts for spatial dependencies.
@@ -160,45 +161,32 @@ Plot the template filled with sample no. 5
 Calculate t-scores between a metadata group for every hexagon and use it
 as a measurement of difference.
 
-    ts <- tscores(hexT, "treatment_dose")
+    ts <- tscores(hexT, "Hautareal")
 
 This returns a data.frame of t-scores with the columns representing
 every possible unique combination of levels in the treatment\_dose
 metadata group. Check the indices with *head(ts)*.
 
     head(ts)
-    #>         3,125-0    6,25-0      12,5-0      25-0      50-0 6,25-3,125 12,5-3,125
-    #> [1,] -0.2751242 0.2274578 -0.57998178 0.7224675 0.1019336  0.5037482 -0.2860039
-    #> [2,]  0.6944512 1.0225454 -0.30495743 0.3895704 0.4476899  0.3756828 -1.0305803
-    #> [3,]  2.1894266 1.4679832  0.05669078 0.8756599 1.0498121 -0.2605903 -1.8727017
-    #> [4,]  3.1136037 1.5322730  0.87936170 1.2424625 1.6216111 -0.8399287 -1.1324296
-    #> [5,]  5.5867544 3.2055839  2.10241390 1.5529765 2.8163271 -0.9964887 -1.4432502
-    #> [6,]  3.3009791 3.6056827  2.95330393 1.3673997 2.2944121 -0.7191945 -1.6810506
-    #>        25-3,125   50-3,125  12,5-6,25     25-6,25     50-6,25    25-12,5
-    #> [1,]  1.0430971  0.4445881 -0.8238255  0.46523884 -0.17223026  1.4764346
-    #> [2,] -0.1781815 -0.2379109 -1.3330693 -0.49572718 -0.59606466  0.6296333
-    #> [3,] -0.2226368 -0.8945110 -1.3052662 -0.05472895 -0.49220335  0.8139920
-    #> [4,] -0.5461003 -1.0016631 -0.3668458  0.08038275 -0.06067205  0.3820174
-    #> [5,] -2.0076015 -0.1928362 -0.5181391 -1.00764989  0.48841786 -0.4416519
-    #> [6,] -2.5333947 -0.2841835 -1.2447823 -2.44010398  0.28008896 -1.4677772
-    #>        50-12,5      50-25
-    #> [1,] 0.8899373 -0.7795065
-    #> [2,] 0.7678481 -0.0225813
-    #> [3,] 0.8980262 -0.2689056
-    #> [4,] 0.3338774 -0.1317701
-    #> [5,] 0.8756360  1.2735054
-    #> [6,] 1.0290481  1.7124040
+    #>      Areal2-Areal1
+    #> [1,]      1.075143
+    #> [2,]      2.198518
+    #> [3,]      2.658937
+    #> [4,]      2.178130
+    #> [5,]      2.306088
+    #> [6,]      2.557509
 
-Plot the differences between two levels (index 5). Use *drop = F* to
-show plot title.
+Plot the differences between the levels of the Hautareal metadata group.
+Use *drop = F* to show plot title.
 
-    plot_tscores(hexT, ts[,5, drop = F], color = NA)
+    plot_tscores(hexT, ts, color = NA)
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 Automatically create polygon gates based on this index.
 
-    gates <- detectGates(hexT, ts[,5], conc = 2)
+    gates <- detectGates(hexT, ts, conc = 5, thresh = 3, nM = 3, tSeed = 248)
+    #> [1] "Seed for this configuration: 248"
 
 Turn into simple features object and plot
 
@@ -208,7 +196,7 @@ Turn into simple features object and plot
 
     psf <- st_polygon(gates)
 
-    plot_tscores(hexT, ts[,5, drop = F], color = NA) + 
+    plot_tscores(hexT, ts, color = NA) + 
       geom_sf(data = psf, fill = NA)
 
 <img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
@@ -225,8 +213,8 @@ matrix as calculated in part 2.
     nmd <- metaMDS(distM, trace = F)
 
     ordiplot(nmd, display = "sites")
-    ordispider(nmd, groups = meta.data(hexT)[,"treatment_dose"])
-    ordiellipse(nmd, groups = meta.data(hexT)[,"treatment_dose"], label = T, draw = "polygon")
+    ordispider(nmd, groups = meta.data(hexT)[,"Hautareal"])
+    ordiellipse(nmd, groups = meta.data(hexT)[,"Hautareal"], label = T, draw = "polygon")
 
 <img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
@@ -244,7 +232,7 @@ library:
     mat_breaks <- mat_breaks[!duplicated(mat_breaks)]
 
     pheatmap(freq, 
-             annotation_row = meta.data(hexT)[,c("treatment_dose"), drop = F], #your metadata groups
+             annotation_row = meta.data(hexT)[,c("Hautareal"), drop = F], #your metadata groups
              color = plasma(length(mat_breaks)-1),
              breaks = mat_breaks,
              treeheight_col = 0)
@@ -259,20 +247,21 @@ treatment\_dose metadata group in this example is a character vector.
 Every dosage is therefore treated as an independent treatment and the
 actual dosage is not taken into account.
 
-    adonis(distM ~ treatment_dose, data = meta.data(hexT))
+    adonis(distM ~ Hautareal + Geschlecht, data = meta.data(hexT))
     #> 
     #> Call:
-    #> adonis(formula = distM ~ treatment_dose, data = meta.data(hexT)) 
+    #> adonis(formula = distM ~ Hautareal + Geschlecht, data = meta.data(hexT)) 
     #> 
     #> Permutation: free
     #> Number of permutations: 999
     #> 
     #> Terms added sequentially (first to last)
     #> 
-    #>                Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)   
-    #> treatment_dose  5   0.43645 0.087291  1.5735 0.24688  0.002 **
-    #> Residuals      24   1.33141 0.055476         0.75312          
-    #> Total          29   1.76787                  1.00000          
+    #>            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
+    #> Hautareal   1   0.18394 0.183936 2.13374 0.07599  0.023 *
+    #> Geschlecht  1   0.08155 0.081553 0.94605 0.03369  0.424  
+    #> Residuals  25   2.15509 0.086204         0.89032         
+    #> Total      27   2.42058                  1.00000         
     #> ---
     #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -328,45 +317,41 @@ You can use the @ operator to look at the slots of the HexTemplate (or
 use *View(hexT)*).
 
     hexT@nHex #number of hexagons
-    #> [1] 382
+    #> [1] 418
 
     hexT@nSamples #number of samples
-    #> [1] 30
+    #> [1] 28
 
     hexT@counts[1] #number of events in every hexagon for sample no 1
-    #> $sample_051518_Tube_001_001.fcs
-    #>   [1]    46    79   184   469   963  1641  2574  3474  2914  1438   436   105
-    #>  [13]    32    22     8     6     3     1     3     2     1   149   318   984
-    #>  [25]  2335  4812  7205 12328 16765 12948  5402  1249   257    87    35    29
-    #>  [37]    18    13     7     9     4     1   107   209   819  2376  4737  7823
-    #>  [49] 11520 22148 30629 23091  9762  1767   296    86    45    31    19    10
-    #>  [61]    15     9     3   130   441  1514  4004  6475  8644 14566 32681 41276
-    #>  [73] 34293 15750  2468   394    87    48    33    32    15    15     8     1
-    #>  [85]    34   106   537  2166  4707  6528  8478 18516 41607 46186 46055 22456
-    #>  [97]  3014   354    97    42    32    23    22     9     2    27    77   407
-    #> [109]  1792  3878  5631  8844 18786 32517 34833 40654 17533  2152   380    92
-    #> [121]    37    29    28    10     9     6     4     1    19   157   643  1704
-    #> [133]  2844  4734  9104 13018 16178 18005  6943  1198   252    76    49    24
-    #> [145]    13    13     5     0     0     1    24   215   750  1276  1997  3825
-    #> [157]  6038  8594  9646  4230   973   207    69    34    22    15     4     4
-    #> [169]     0     0     0     1    12   170   428   691  1450  2740  4368  5762
-    #> [181]  5550  2763   757   167    72    38    18     5    10     0     0     0
-    #> [193]     1    11    79   190   438   882  1688  2488  3416  3543  2037   656
-    #> [205]   171    64    22    18     4     3     0     0     2     1    35   126
-    #> [217]   209   398   795  1192  1854  2090  1371   494   141    48    22    10
-    #> [229]     7     0     0     0    15    57    66   111   227   442   874  1207
-    #> [241]  1045   355   132    27    18     9     6     0     0     1     2    11
-    #> [253]    14    25    89   149   446   678   657   329    77    31    18     5
-    #> [265]     0     0     0     0     3     5    21    84   195   378   450   244
-    #> [277]    49    18    10     2     0     0     0     1     1     3     8    23
-    #> [289]   108   224   327   129    44    15    14     0     0     0     0     1
-    #> [301]     6    16    49   155   221   125    33    13     2     0     0     0
-    #> [313]     0     0     0     1     0     4    22    71   162    81    27    18
-    #> [325]     0     0     0     3     7    61    96    60    13     6     0     0
-    #> [337]     0     0     1     1    16    76    37    16     0     0     0     2
-    #> [349]    10    35    33    10     0     0     0     0     1     2     6    34
-    #> [361]    46     0     0     0     0     0     0     1    21    14     0     0
-    #> [373]     0     1    43     0     0     0     0     0     1    19
+    #> $Areal1_03_022.fcs
+    #>   [1]   11  323  423  389  343  294  236  163  144  149  109   84   38   37   30
+    #>  [16]   32   22   11    8    4    5 1414 3078 3166 2975 2725 2080 1658 1485 1334
+    #>  [31] 1224  978  594  392  377  283  195   94   63   35   37  268 3443 4229 4231
+    #>  [46] 3907 3632 2815 2632 2466 2459 2878 1979 1048  629  535  404  253  160  117
+    #>  [61]   63   97  585 1168 1306 1531 1758 1982 1996 1828 1722 2022 2483 1742  917
+    #>  [76]  509  311  224  180  122   77  107    8   73  111  289  530  944 1426 1644
+    #>  [91] 1515 1108 1230 1520 1343  724  398  220  147   98  100   67  159    6   28
+    #> [106]   70  262  491  879 1419 1706 1353  929  865  938  880  634  361  234  142
+    #> [121]   83   81  135    0    4   18   73  253  400  810 1235 1363  995  715  665
+    #> [136]  716  661  502  306  205  131   74   64  252    0    2   21   85  226  352
+    #> [151]  616  949  957  762  591  547  551  477  411  274  166   93   65  166    0
+    #> [166]    0    4   12   73  163  275  424  646  691  514  418  448  412  395  327
+    #> [181]  242  161   86   56  235    0    1    2   21   67  118  197  339  427  476
+    #> [196]  385  347  345  391  314  277  200  114   67  117    0    0    3   21   45
+    #> [211]   68  138  211  214  267  274  265  280  305  287  209  127  104   49  139
+    #> [226]    0    0    1    8   22   25   60  120  132  133  167  165  207  198  234
+    #> [241]  161  112   85   98    0    0    0    0    2    6   12   28   45   60   72
+    #> [256]  108  122  149  166  187  152  106   56  109    0    0    0    2    1    5
+    #> [271]   18   27   34   39   70   98  108  108  134  122   70   93    0    0    0
+    #> [286]    0    1    3    3   11   12    9   26   47   60   86   81   81   81   65
+    #> [301]  127    0    1    0    2    3    6   12   16   28   30   50   58   65   63
+    #> [316]  112    1    0    0    0    0    2    4    7   10   16   33   30   50   42
+    #> [331]   43  157    0    0    1    0    1    1    1    3   12    6   23   29   36
+    #> [346]   41   94    0    0    0    0    1    2    3    3   10   17   20   36   36
+    #> [361]  187    0    0    0    0    1    6    6   10   13   20   34  100    0    0
+    #> [376]    0    0    0    0    1    2    7    9   10   18   18  138    0    0    1
+    #> [391]    1    4    0    5    8    9   14   78    0    1    0    0    1    1    4
+    #> [406]    6   10   12  112    0    0    0    4    3    9   10   21  406
 
     hexT@counts[[1]][25] #number of events in hexagon 25 for sample no 1
-    #> [1] 2335
+    #> [1] 2975

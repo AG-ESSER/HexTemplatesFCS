@@ -7,13 +7,13 @@
 #' @param tryO An integer that determines how many times should be looked for the best configuration
 #' @param nM An integer specifying what is considered a neighbor
 #'
-#' @return A sf Object
+#' @return A list of coordinates
 #' @export
 #' @import dplyr
 #' @import sf
 #' @import concaveman
 #' @examples
-detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, conc = 3.5) {
+detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, conc = 3.5, tSeed = NA) {
 
   floodFill <- function(hexNr, org, rn) {
     for(i in 1:template@nHex) {
@@ -55,23 +55,29 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, c
   #creating environment for modifying by reference
   roi.env <- new.env()
   roi.env$roi <- rep(0, template@nHex)
-  mx <- 0
-  bestSeed <- 0
-  #find best configuration
-  for(seed in sample(1000,tryO)) {
-    roi.env$roi <- rep(0, template@nHex)
-    count <- 1
-    set.seed(seed)
-    entryPoint()
 
-    hist <- table(roi.env$roi)
-    #find optimal (most hexagons covered with minimal number of gates)
-    m <- sum(hist[-1])/nlevels(as.factor(roi.env$roi))
-    if(m > mx) {
-      mx <- m
-      bestSeed <- seed
+  if (is.na(tSeed)) {
+    mx <- 0
+    bestSeed <- 0
+    #find best configuration
+    for(seed in sample(1000,tryO)) {
+      roi.env$roi <- rep(0, template@nHex)
+      count <- 1
+      set.seed(seed)
+      entryPoint()
+
+      hist <- table(roi.env$roi)
+      #find optimal (most hexagons covered with minimal number of gates)
+      m <- sum(hist[-1])/nlevels(as.factor(roi.env$roi))
+      if(m > mx) {
+        mx <- m
+        bestSeed <- seed
+      }
     }
+  } else {
+    bestSeed <- tSeed
   }
+  print(paste0("Seed for this configuration: ",bestSeed))
 
   roi.env$roi <- rep(0, template@nHex)
   count <- 1

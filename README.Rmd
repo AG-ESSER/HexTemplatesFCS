@@ -2,7 +2,7 @@
 output: 
   github_document:
     toc: true
-    toc_depth: 3
+    toc_depth: 4
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -42,7 +42,7 @@ The .fcs-files should already be cleaned up. The metadata table should preferabl
 ```{r example}
 library(flowCore)
 
-setwd("C:/Users/student.esser/FACSDATA/Exp4")                 #set working directory
+setwd("C:/Users/student.esser/FACSDATA/FCS_skin_microbiome")  #set working directory
 fcs <- read.flowSet(pattern = ".fcs")                         #read all .fcs-files in directory
 metadata <- read.table("metadata.csv", sep = ";", header = T) #read metadata table
 ```
@@ -63,7 +63,7 @@ Create the HexTemplate:
 ```{r}
 library(HexTemplatesFCS)
 
-hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "DAPI-H", xbins = 20, metadata = metadata, trans_fun = log10)
+hexT <- HexTemplate(flowset = fcs, xChannel = "SSC-H", yChannel = "FITC-H", xbins = 20, metadata = metadata, trans_fun = log10)
 ```
 Every further output will be based on this template. The *flowset* argument takes the flowSet we acquired by reading the .fcs-files in part \1. For the *xChannel* and the *yChannel* argument select the channels you are interested in examining. The number of *xbins* correspond to the number of hexagons on the x-axis - 1. This should be at least 20. Lastly give your metadata table to the *metadata* argument. Give a function to transform your data to the trans_fun argument. Standard is log10. When no data transformation should be done use *return*. The content of a HexTemplate can be inspected using *View(hexT)*.
 
@@ -99,7 +99,7 @@ plot(hexT, sample = 5)
 Calculate t-scores between a metadata group for every hexagon and use it as a measurement of difference.
 
 ```{r}
-ts <- tscores(hexT, "treatment_dose")
+ts <- tscores(hexT, "Hautareal")
 ```
 This returns a data.frame of t-scores with the columns representing every possible unique combination of levels in the treatment_dose metadata group. Check the indices with *head(ts)*.
 
@@ -107,14 +107,14 @@ This returns a data.frame of t-scores with the columns representing every possib
 head(ts)
 ```
 
-Plot the differences between two levels (index 5). Use *drop = F* to show plot title.
+Plot the differences between the levels of the Hautareal metadata group. Use *drop = F* to show plot title.
 ```{r}
-plot_tscores(hexT, ts[,5, drop = F], color = NA)
+plot_tscores(hexT, ts, color = NA)
 ```
 
 Automatically create polygon gates based on this index.
 ```{r}
-gates <- detectGates(hexT, ts[,5], conc = 2)
+gates <- detectGates(hexT, ts, conc = 5, thresh = 3, nM = 3, tSeed = 248)
 ```
 
 Turn into simple features object and plot
@@ -124,7 +124,7 @@ library(ggplot2)
 
 psf <- st_polygon(gates)
 
-plot_tscores(hexT, ts[,5, drop = F], color = NA) + 
+plot_tscores(hexT, ts, color = NA) + 
   geom_sf(data = psf, fill = NA)
 
 ```
@@ -137,8 +137,8 @@ library(vegan)
 nmd <- metaMDS(distM, trace = F)
 
 ordiplot(nmd, display = "sites")
-ordispider(nmd, groups = meta.data(hexT)[,"treatment_dose"])
-ordiellipse(nmd, groups = meta.data(hexT)[,"treatment_dose"], label = T, draw = "polygon")
+ordispider(nmd, groups = meta.data(hexT)[,"Hautareal"])
+ordiellipse(nmd, groups = meta.data(hexT)[,"Hautareal"], label = T, draw = "polygon")
 ```
 
 ### Part 3.4: Heatmap
@@ -151,7 +151,7 @@ mat_breaks <- quantile(freq, probs = seq(0, 1, length.out = 10))
 mat_breaks <- mat_breaks[!duplicated(mat_breaks)]
 
 pheatmap(freq, 
-         annotation_row = meta.data(hexT)[,c("treatment_dose"), drop = F], #your metadata groups
+         annotation_row = meta.data(hexT)[,c("Hautareal"), drop = F], #your metadata groups
          color = plasma(length(mat_breaks)-1),
          breaks = mat_breaks,
          treeheight_col = 0)
@@ -160,7 +160,7 @@ pheatmap(freq,
 ### Part 3.5: adonis (PERMANOVA)
 Use *vegan's* *adonis*-function and the distance matrix we calculated in part 2 to get statistical output about your data. Be aware that the treatment_dose metadata group in this example is a character vector. Every dosage is therefore treated as an independent treatment and the actual dosage is not taken into account.
 ```{r}
-adonis(distM ~ treatment_dose, data = meta.data(hexT))
+adonis(distM ~ Hautareal + Geschlecht, data = meta.data(hexT))
 ```
 
 ## Part 4: Customizing the plots
