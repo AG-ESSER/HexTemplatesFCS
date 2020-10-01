@@ -29,7 +29,7 @@ detectGates(
 \item{nM}{An integer specifying what is considered a neighbor}
 }
 \value{
-A sf Object
+A list of coordinates
 }
 \description{
 Automatically detect Gates based on the t-scores

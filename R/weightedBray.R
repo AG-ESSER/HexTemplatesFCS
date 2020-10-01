@@ -1,6 +1,6 @@
 #' Compute Weighted Bray Distance between Samples of a HexTemplate
 #'
-#' @param hexTemplate A \code{\link{HexTemplate}} Object
+#' @param template A \code{\link{HexTemplate}} Object
 #' @param gamma A positive number specifying the drop off of the weight matrix when w = NA
 #' @param w Optionally you may provide your own weight matrix created with \code{\link{weightMatrix}}
 #'
@@ -9,19 +9,17 @@
 #' @export
 #'
 #' @examples
-weightedBray <- function(hexTemplate, gamma = 8, w = NA) {
+weightedBray <- function(template, gamma = 8, w = NA) {
   #computes weighted bray distance between samples
   #if w is undefined then w = exp(-1*gamma*euclDist)
 
-  h <- t(frequencies(hexTemplate))
+  h <- t(frequencies(template))
 
   if(is.na(w)) {
-    centroids <- as.data.frame(coordinates(hexTemplate@hexagonSP))
-    euclDist <- as.matrix(dist(centroids, method = "euclidean"))
-    w = exp(-1*gamma*euclDist)
+    w <- weightMatrix(template, gamma = gamma)
   }
 
-  len <- hexTemplate@nSamples
+  len <- template@nSamples
   d <- matrix(nrow = len, ncol = len)
 
   for(i in 1:len) {

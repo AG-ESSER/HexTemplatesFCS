@@ -17,7 +17,7 @@ weightMatrix <- function(template, method = "exp", gamma = 8, val = c(.5,.25,.25
 
   if(method == "exp") {
 
-    w = exp(-1*gamma*euclDist)
+    w <- exp(-1*gamma*euclDist)
 
   } else {
 

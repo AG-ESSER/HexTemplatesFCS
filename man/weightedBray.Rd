@@ -4,10 +4,10 @@
 \alias{weightedBray}
 \title{Compute Weighted Bray Distance between Samples of a HexTemplate}
 \usage{
-weightedBray(hexTemplate, gamma = 8, w = NA)
+weightedBray(template, gamma = 8, w = NA)
 }
 \arguments{
-\item{hexTemplate}{A \code{\link{HexTemplate}} Object}
+\item{template}{A \code{\link{HexTemplate}} Object}
 
 \item{gamma}{A positive number specifying the drop off of the weight matrix when w = NA}
 

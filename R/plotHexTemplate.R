@@ -27,7 +27,7 @@ plot.HexTemplate <- function(template, sample = NA,...) {
     ggplot(sf_poly,aes(fill = log10(freq)))+
       geom_sf(...) +
       scale_fill_gradientn(colours = colours) +
-      labs(fill = "log10(Events)", title = names(template@counts[sample]), x = template@xChannel, y = template@yChannel)
+      labs(fill = "log10(%Events)", title = names(template@counts[sample]), x = template@xChannel, y = template@yChannel)
 
   }
 }
