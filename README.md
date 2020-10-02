@@ -20,6 +20,9 @@
         -   [Custom Weight Matrices](#custom-weight-matrices)
         -   [Visualizing Weight Matrices](#visualizing-weight-matrices)
     -   [t-Score Gate Detection](#t-score-gate-detection)
+        -   [detectGates](#detectgates)
+        -   [Create FlowJo workspaces with the t-score based
+            gates](#create-flowjo-workspaces-with-the-t-score-based-gates)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- knitr::knit("README.Rmd") -->
@@ -114,8 +117,8 @@ function to access the metadata slot of the HexTemplate.
     #> Terms added sequentially (first to last)
     #> 
     #>           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-    #> areal      1   0.18394 0.183936 2.13374 0.07599  0.019 *
-    #> sex        1   0.08155 0.081553 0.94605 0.03369  0.395  
+    #> areal      1   0.18394 0.183936 2.13374 0.07599  0.021 *
+    #> sex        1   0.08155 0.081553 0.94605 0.03369  0.424  
     #> Residuals 25   2.15509 0.086204         0.89032         
     #> Total     27   2.42058                  1.00000         
     #> ---
@@ -309,25 +312,88 @@ no. 256 as contained in the default exponential weight matrix.
 
 <img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
-With the discrete approach we can make the weights between hexagons
-depend on the ranked distance between them.
-
-    wM <- weightMatrix(hexT, method = "disc", val = c(.5,.25,.25))
-
-    plot(hexT, mapping = aes(fill = wM[,256])) + 
-      geom_sf_text(aes(label = 1:hexT@nHex), size = 2)
-
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="100%" />
-
-This way we can also use functions to create more complicated
-dependencies if needed.
-
-    wM <- weightMatrix(hexT, method = "disc", val = sin((1:500)*100))
-
-    plot(hexT, mapping = aes(fill = wM[,256])) + 
-      geom_sf_text(aes(label = 1:hexT@nHex), size = 2)
-
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
-
 t-Score Gate Detection
 ----------------------
+
+### detectGates
+
+We can use the *detectGates* function to try and approximate meaningful
+gates based on the t-scores using a floodfill approach.
+
+    gates <- detectGates(hexT, ts)
+    #> [1] "Seed for this configuration: 487"
+
+We can overlay the gates over the t-score plot by turning the gates into
+simple features polygons.
+
+    library(sf)
+    #> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
+
+    psf <- st_polygon(gates)
+
+Plot the gates and t-scores.
+
+    plot_tscores(hexT, ts, color = NA) + 
+      geom_sf(data = psf, fill = NA)
+
+<img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
+
+There is a lot of fine tuning that we can do for the detectGates
+function. The function is a simple visual aid and the starting hexagons
+are randomly seeded so we can feel free to try multiple times and with
+different arguments until we have a seed and configuration that we like.
+We can check the documentation of the detectGates function by typing
+‘?detectGates’ into the R-console.
+
+A more sensible configuration
+
+    gates <- detectGates(hexT, ts, conc = 5, thresh = 3, nM = 3, tSeed = 248)
+    #> [1] "Seed for this configuration: 248"
+
+Turn into simple features object and plot
+
+    psf <- st_polygon(gates)
+
+    plot_tscores(hexT, ts, color = NA) + 
+      geom_sf(data = psf, fill = NA)
+
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="100%" />
+
+### Create FlowJo workspaces with the t-score based gates
+
+For this we need the *flowWorkspace* package, the *CytoML* package in
+addition to the *flowCore* package as well as an installation of docker
+which runs in the background. Install docker and then follow the steps
+here to get the *gatingset\_to\_flowjo* function working:
+<https://hub.docker.com/r/rglab/gs-to-flowjo>.
+
+First we create a function for transforming our data. This needs to be
+the inverse of the original transformation function that was given to
+the HexTemplate function in the beginning. Here it was log10 so our
+inverse function looks like this:
+
+    inv <- function(x) {
+      10^x
+    }
+
+Next we turn our flowSet into a GatingSet and apply our gates to it.
+Finally we turn it into a FlowJo workspace by running the
+*gatingset\_to\_flowjo* function while docker is running in the
+background.
+
+    library(flowWorkspace)
+
+    gs <- GatingSet(fcs)
+
+    for (i in 1:length(gates)) {
+      sqrcut <- inv(gates[[i]])
+      colnames(sqrcut) <- c(hexT@xChannel, hexT@yChannel)
+      pg <- polygonGate(filterId = as.character(i), .gate = sqrcut)
+      gs_pop_add(gs, pg)
+    }
+
+    recompute(gs)
+
+    library(CytoML)
+    outFile <- paste("skin_microbiome", fileext = ".wsp", sep = "")
+    gatingset_to_flowjo(gs, outFile)
