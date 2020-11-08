@@ -77,7 +77,8 @@ detectGates <- function(template, ts, thresh = 5, minT = 1, tryO = 10, nM = 2, c
   } else {
     bestSeed <- tSeed
   }
-  print(paste0("Seed for this configuration: ",bestSeed))
+
+  cat("Seed for this configuration: ",bestSeed)
 
   roi.env$roi <- rep(0, template@nHex)
   count <- 1

@@ -107,7 +107,7 @@ In this case a blue colored hexagon indicates a decrease in event percentage in 
 
 ## HexTemplate
 
-There are some adjustments we can do to the HexTemplates function. We can change the resolution of the hexagon grid by using the **xbins** argument that is directly passed to the *hexbin* function from the *hexbin* package that HexTemplate uses internally to create the grid. Default is 20 (meaning 21 hexagons on the x-axis). This number should not be lowered as the *adonis* and *metaMDS* functions are not stable for lower numbers of hexagons.
+There are some adjustments we can make to the HexTemplates function. We can change the resolution of the hexagon grid by using the **xbins** argument that is directly passed to the *hexbin* function from the *hexbin* package that HexTemplate uses internally to create the grid. Default is 20 (meaning 21 hexagons on the x-axis). This number should not be lowered as the *adonis* and *metaMDS* functions are not stable for lower numbers of hexagons.
 
 Furthermore we can give a function to transform the data to the **trans_fun** argument. If no function is given the data will be log10 transformed. If the data should not be transformed at all then *trans_fun = return* will do the trick.
 
@@ -181,7 +181,7 @@ distM2 <- weightedBray(hexT, gamma = 2) #bigger region of spatial dependecy
 
 If the default exponential approach is not what we want we can use the *weightMatrix* function and give it to the **w** argument of the *weightedBray* function. For the *weightMatrix* function we can choose between an exponential approach or a discrete approach by calling the function with either "exp" or "disc" as the **method** argument. If no custom weight matrix is given then *weightedBray* uses the exponential approach of the *weightMatrix* function by default.
 
-The following creates the same distance Matrix as in the "Quick Start"-chapter:
+The following creates the same distance matrix as in the "Quick Start"-chapter:
 ```{r, eval = FALSE}
 wM_exp <- weightMatrix(hexT, method = "exp", gamma = 8)
 distM <- weightedBray(hexT, w = wM_exp)
@@ -195,7 +195,7 @@ wM_disc <- weightMatrix(hexT, method = "disc", val = c(.5,.25,.25))
 
 ### Visualizing Weight Matrices
 
-We can visualize the different weight matrices by plotting the empty hexagon grid and giving the a column of a weight matrix to the fill aesthetic of the *plot* function.
+We can visualize the different weight matrices by plotting the empty hexagon grid and giving a column of a weight matrix to the fill aesthetic of the *plot* function.
 
 In this case we plot the weights of every hexagon relating to hexagon no. 256 as contained in the default exponential weight matrix.
 ```{r}
@@ -227,7 +227,7 @@ plot_tscores(hexT, ts, color = NA) +
   geom_sf(data = psf, fill = NA)
 ```
 
-There is a lot of fine tuning that we can do for the detectGates function. The function is a simple visual aid and the starting hexagons are randomly seeded so we can feel free to try multiple times and with different arguments until we have a seed and configuration that we like. We can check the documentation of the detectGates function by typing '?detectGates' into the R-console.
+There is a lot of fine tuning that we can do to the detectGates function. The function is a simple visual aid and the starting hexagons are randomly seeded so we can feel free to try multiple times and with different arguments until we have a seed and configuration that we like. We can check the documentation of the detectGates function by typing '?detectGates' into the R-console.
 
 A more sensible configuration
 ```{r}
@@ -263,9 +263,9 @@ library(flowWorkspace)
 gs <- GatingSet(fcs)
 
 for (i in 1:length(gates)) {
-  sqrcut <- inv(gates[[i]])
-  colnames(sqrcut) <- c(hexT@xChannel, hexT@yChannel)
-  pg <- polygonGate(filterId = as.character(i), .gate = sqrcut)
+  polyg <- inv(gates[[i]])
+  colnames(polyg) <- c(hexT@xChannel, hexT@yChannel)
+  pg <- polygonGate(filterId = as.character(i), .gate = polyg)
   gs_pop_add(gs, pg)
 }
 

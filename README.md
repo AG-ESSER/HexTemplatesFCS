@@ -117,8 +117,8 @@ function to access the metadata slot of the HexTemplate.
     #> Terms added sequentially (first to last)
     #> 
     #>           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-    #> areal      1   0.18394 0.183936 2.13374 0.07599  0.021 *
-    #> sex        1   0.08155 0.081553 0.94605 0.03369  0.424  
+    #> areal      1   0.18394 0.183936 2.13374 0.07599  0.023 *
+    #> sex        1   0.08155 0.081553 0.94605 0.03369  0.416  
     #> Residuals 25   2.15509 0.086204         0.89032         
     #> Total     27   2.42058                  1.00000         
     #> ---
@@ -173,7 +173,7 @@ explained in the “t-Score Gate Detection”-chapter.
 HexTemplate
 -----------
 
-There are some adjustments we can do to the HexTemplates function. We
+There are some adjustments we can make to the HexTemplates function. We
 can change the resolution of the hexagon grid by using the **xbins**
 argument that is directly passed to the *hexbin* function from the
 *hexbin* package that HexTemplate uses internally to create the grid.
@@ -283,7 +283,7 @@ function with either “exp” or “disc” as the **method** argument. If no
 custom weight matrix is given then *weightedBray* uses the exponential
 approach of the *weightMatrix* function by default.
 
-The following creates the same distance Matrix as in the “Quick
+The following creates the same distance matrix as in the “Quick
 Start”-chapter:
 
     wM_exp <- weightMatrix(hexT, method = "exp", gamma = 8)
@@ -299,7 +299,7 @@ approach depends on the resolution of the hexagon grid.
 ### Visualizing Weight Matrices
 
 We can visualize the different weight matrices by plotting the empty
-hexagon grid and giving the a column of a weight matrix to the fill
+hexagon grid and giving a column of a weight matrix to the fill
 aesthetic of the *plot* function.
 
 In this case we plot the weights of every hexagon relating to hexagon
@@ -321,7 +321,7 @@ We can use the *detectGates* function to try and approximate meaningful
 gates based on the t-scores using a floodfill approach.
 
     gates <- detectGates(hexT, ts)
-    #> [1] "Seed for this configuration: 487"
+    #> Seed for this configuration:  286
 
 We can overlay the gates over the t-score plot by turning the gates into
 simple features polygons.
@@ -338,7 +338,7 @@ Plot the gates and t-scores.
 
 <img src="man/figures/README-unnamed-chunk-21-1.png" width="100%" />
 
-There is a lot of fine tuning that we can do for the detectGates
+There is a lot of fine tuning that we can do to the detectGates
 function. The function is a simple visual aid and the starting hexagons
 are randomly seeded so we can feel free to try multiple times and with
 different arguments until we have a seed and configuration that we like.
@@ -348,7 +348,7 @@ We can check the documentation of the detectGates function by typing
 A more sensible configuration
 
     gates <- detectGates(hexT, ts, conc = 5, thresh = 3, nM = 3, tSeed = 248)
-    #> [1] "Seed for this configuration: 248"
+    #> Seed for this configuration:  248
 
 Turn into simple features object and plot
 
@@ -386,9 +386,9 @@ background.
     gs <- GatingSet(fcs)
 
     for (i in 1:length(gates)) {
-      sqrcut <- inv(gates[[i]])
-      colnames(sqrcut) <- c(hexT@xChannel, hexT@yChannel)
-      pg <- polygonGate(filterId = as.character(i), .gate = sqrcut)
+      polyg <- inv(gates[[i]])
+      colnames(polyg) <- c(hexT@xChannel, hexT@yChannel)
+      pg <- polygonGate(filterId = as.character(i), .gate = polyg)
       gs_pop_add(gs, pg)
     }
 
